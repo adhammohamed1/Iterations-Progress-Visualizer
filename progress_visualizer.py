@@ -54,6 +54,7 @@ class ProgressVisualizer:
         self.bar_length = bar_length
         self.done_color = done_color
         self.progress_color = progress_color
+        self.fill_char = '='
         self.cursor_pos = (None, None)
 
 
@@ -68,6 +69,7 @@ class ProgressVisualizer:
             total (int): The total iterable length.
             desc (str): The description of the operation in progress.
         """
+        
         filled = int(math.floor(self.bar_length * progress / float(total)))
         pending = self.bar_length - filled
         perc = round(100 * progress / float(total), 2)
@@ -79,7 +81,7 @@ class ProgressVisualizer:
         print(f'{desc}:', end=' ')
 
         # Update the progress bar
-        bar_raw = '=' * filled + ' ' * pending
+        bar_raw = self.fill_char * filled + ' ' * pending
         bar = _colorize(bar_raw, self.progress_color if progress < total else self.done_color)
         print(f'[{bar}]', end=' ') # Print the progress bar
 
@@ -118,7 +120,7 @@ class ProgressVisualizer:
         return row, col
 
     def visualize(
-            self, iterable: Iterable, desc: str = 'Progress'
+            self, iterable: Iterable, desc: str = 'Progress', fill_char: str = '='
             ):
         """
         Visualizes the progress of an iterable.
@@ -126,10 +128,13 @@ class ProgressVisualizer:
         Parameters:
             iterable (Iterable): The iterable to visualize.
         """
-
+        if len(fill_char) != 1:
+            raise ValueError('The fill character must be a single character.')
+        self.fill_char = fill_char
+        
         self.cursor_pos = self._get_current_cursor_pos()
-
         total = len(iterable)
+
         for i, item in enumerate(iterable):
 
             # Save the cursor position prior to updating the progress bar
